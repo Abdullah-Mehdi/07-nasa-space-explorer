@@ -67,12 +67,18 @@ python -m http.server 8000
 
 ## 🎮 How to Use
 
-1. **Select Date Range**: Use the date pickers to choose your desired time period
-2. **Get Space Images**: Click the button to fetch NASA's amazing content
-3. **Explore Gallery**: Hover over images for 3D tilt effects
-4. **View Details**: Click any image or video for full-screen modal view
-5. **Discover Facts**: Learn something new with the random space facts section
-6. **Get More Facts**: Click the rocket button for additional astronomy trivia
+1. **Set Up API Key**: When you first visit, you'll see an API key setup screen:
+   - **Option A**: Get your free NASA API key at [api.nasa.gov](https://api.nasa.gov/) (recommended)
+   - **Option B**: Use the demo key for limited testing (30 requests/hour)
+2. **Select Date Range**: Use the date pickers to choose your desired time period
+3. **Get Space Images**: Click the button to fetch NASA's amazing content
+4. **Explore Gallery**: Hover over images for 3D tilt effects
+5. **View Details**: Click any image or video for full-screen modal view
+6. **Download Images**: Use the download button (💾) to save high-resolution versions
+7. **Share Content**: Click the share button (🔗) to share NASA's amazing discoveries
+8. **Toggle Theme**: Use the theme button (🌙/☀️) to switch between light and dark modes
+9. **Discover Facts**: Learn something new with the random space facts section
+10. **Get More Facts**: Click the rocket button for additional astronomy trivia
 
 ## 🛠️ Technical Highlights
 
@@ -126,14 +132,27 @@ This project demonstrates:
 
 ## 🔧 Configuration
 
-The project uses NASA's APOD API. To set up:
+### **For GitHub Pages Deployment**
+The app is ready for GitHub Pages! Users can:
+- Use the built-in demo key (30 requests/hour limit)
+- Enter their own free NASA API key for unlimited access
+- API keys are stored securely in browser localStorage
 
+### **For Local Development**
+You can still use a config file approach:
 1. Get a free API key from [NASA API Portal](https://api.nasa.gov/)
 2. Create `js/config.js` with your key:
 ```javascript
+// The app will automatically detect and use this
 const NASA_API_KEY = 'your-api-key-here';
-const NASA_API_URL = 'https://api.nasa.gov/planetary/apod';
 ```
+
+### **Getting Your NASA API Key**
+1. Visit [api.nasa.gov](https://api.nasa.gov/)
+2. Click "Get Started" 
+3. Fill out the simple form (name, email, use case)
+4. Receive your key instantly via email
+5. No credit card required - it's completely free!
 
 ## 🤝 Contributing
 

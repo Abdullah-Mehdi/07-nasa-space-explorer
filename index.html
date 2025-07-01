@@ -20,9 +20,41 @@
     </header>
 
     <div class="filters">
-      <input type="date" id="startDate" />
-      <input type="date" id="endDate" />
-      <button id="fetchButton">Get Space Images</button>
+      <!-- API Key Setup Section -->
+      <div class="api-key-section" id="apiKeySection">
+        <div class="api-key-container">
+          <h3>🔑 NASA API Key Setup</h3>
+          <p>To explore NASA's amazing space images, you'll need a free API key:</p>
+          <div class="api-key-steps">
+            <ol>
+              <li>Get your free key at <a href="https://api.nasa.gov/" target="_blank" rel="noopener">api.nasa.gov</a></li>
+              <li>Enter it below (stored locally in your browser)</li>
+              <li>Start exploring the cosmos! 🌌</li>
+            </ol>
+          </div>
+          <div class="api-key-input-group">
+            <input type="text" id="apiKeyInput" placeholder="Enter your NASA API key here..." />
+            <button id="saveApiKeyButton">Save Key 🚀</button>
+          </div>
+          <div class="demo-key-option">
+            <button id="useDemoKeyButton" class="demo-key-btn">Try with Demo Key (Limited)</button>
+            <p class="demo-key-note">
+              <small>⚠️ Demo key allows only 30 requests per hour. For full experience, use your own free API key!</small>
+            </p>
+          </div>
+          <p class="api-key-note">
+            <small>🔒 Your API key is stored securely in your browser's local storage and never shared.</small>
+          </p>
+        </div>
+      </div>
+      
+      <!-- Date Selection (initially hidden) -->
+      <div class="date-filters" id="dateFilters" style="display: none;">
+        <input type="date" id="startDate" />
+        <input type="date" id="endDate" />
+        <button id="fetchButton">Get Space Images</button>
+        <button id="changeApiKeyButton" class="change-api-key-btn">🔑 Change API Key</button>
+      </div>
     </div>
 
     <!-- Fun Space Facts Section -->

@@ -1,3 +1,105 @@
+// API Key Management Elements
+const apiKeySection = document.getElementById('apiKeySection');
+const dateFilters = document.getElementById('dateFilters');
+const apiKeyInput = document.getElementById('apiKeyInput');
+const saveApiKeyButton = document.getElementById('saveApiKeyButton');
+const changeApiKeyButton = document.getElementById('changeApiKeyButton');
+const useDemoKeyButton = document.getElementById('useDemoKeyButton');
+
+// Initialize API key management
+initializeAPIKeySetup();
+
+function initializeAPIKeySetup() {
+  // Check if user already has an API key
+  if (hasUserAPIKey()) {
+    showDateFilters();
+  } else {
+    showAPIKeySetup();
+  }
+  
+  // Add event listeners
+  saveApiKeyButton.addEventListener('click', handleSaveAPIKey);
+  changeApiKeyButton.addEventListener('click', showAPIKeySetup);
+  useDemoKeyButton.addEventListener('click', handleUseDemoKey);
+  
+  // Allow Enter key to save API key
+  apiKeyInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      handleSaveAPIKey();
+    }
+  });
+}
+
+function handleUseDemoKey() {
+  saveNASAAPIKey('DEMO_KEY');
+  showAPIKeyFeedback('Using demo key! Limited to 30 requests per hour. ⚠️', false);
+  setTimeout(() => {
+    showDateFilters();
+  }, 2000);
+}
+
+function handleSaveAPIKey() {
+  const apiKey = apiKeyInput.value.trim();
+  
+  if (!apiKey) {
+    showAPIKeyFeedback('Please enter your NASA API key.', true);
+    return;
+  }
+  
+  // Basic validation (NASA API keys are typically 40 characters)
+  if (apiKey.length < 20) {
+    showAPIKeyFeedback('API key seems too short. Please check and try again.', true);
+    return;
+  }
+  
+  // Save the API key
+  if (saveNASAAPIKey(apiKey)) {
+    showAPIKeyFeedback('API key saved successfully! 🚀', false);
+    setTimeout(() => {
+      showDateFilters();
+    }, 1500);
+  } else {
+    showAPIKeyFeedback('Failed to save API key. Please try again.', true);
+  }
+}
+
+function showAPIKeySetup() {
+  apiKeySection.style.display = 'block';
+  dateFilters.style.display = 'none';
+  apiKeyInput.value = '';
+  apiKeyInput.focus();
+}
+
+function showDateFilters() {
+  apiKeySection.style.display = 'none';
+  dateFilters.style.display = 'flex';
+}
+
+function showAPIKeyFeedback(message, isError) {
+  // Remove existing feedback
+  const existingFeedback = document.getElementById('apiKeyFeedback');
+  if (existingFeedback) {
+    existingFeedback.remove();
+  }
+  
+  // Create feedback element
+  const feedback = document.createElement('div');
+  feedback.id = 'apiKeyFeedback';
+  feedback.className = isError ? 'api-feedback api-error' : 'api-feedback api-success';
+  feedback.textContent = message;
+  
+  // Insert after the input group
+  const inputGroup = document.querySelector('.api-key-input-group');
+  inputGroup.parentNode.insertBefore(feedback, inputGroup.nextSibling);
+  
+  // Auto-remove feedback after delay
+  setTimeout(() => {
+    if (feedback.parentNode) {
+      feedback.remove();
+    }
+  }, 3000);
+}
+
 // Theme toggle functionality
 const themeToggle = document.getElementById('themeToggle');
 const themeIcon = themeToggle.querySelector('.theme-icon');
@@ -552,15 +654,22 @@ async function fetchNASAImages() {
   `;
   
   try {
-    // Build the API URL with the date range and API key
-    const apiUrl = `${NASA_API_URL}?start_date=${startDate}&end_date=${endDate}&api_key=${NASA_API_KEY}`;
+    // Build the API URL with the date range and dynamic API key
+    const apiKey = getNASAAPIKey();
+    const apiUrl = `${NASA_API_URL}?start_date=${startDate}&end_date=${endDate}&api_key=${apiKey}`;
     
     // Fetch data from NASA APOD API
     const response = await fetch(apiUrl);
     
     // Check if the request was successful
     if (!response.ok) {
-      throw new Error(`API request failed: ${response.status}`);
+      if (response.status === 403) {
+        throw new Error('Invalid API key. Please check your NASA API key and try again.');
+      } else if (response.status === 429) {
+        throw new Error('API rate limit exceeded. Please try again later or use your own API key.');
+      } else {
+        throw new Error(`API request failed: ${response.status}`);
+      }
     }
     
     // Parse the JSON response
