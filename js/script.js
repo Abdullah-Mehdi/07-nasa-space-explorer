@@ -76,8 +76,9 @@ const modalDate = document.getElementById('modalDate');
 const modalExplanation = document.getElementById('modalExplanation');
 const closeModal = document.querySelector('.close');
 const modalShareButton = document.getElementById('modalShareButton');
+const modalDownloadButton = document.getElementById('modalDownloadButton');
 
-// Variable to store current modal item for sharing
+// Variable to store current modal item for sharing and downloading
 let currentModalItem = null;
 
 // Call the setupDateInputs function from dateRange.js
@@ -211,6 +212,15 @@ modalShareButton.addEventListener('click', () => {
   }
 });
 
+// Modal download button event listener
+modalDownloadButton.addEventListener('click', (e) => {
+  if (currentModalItem && currentModalItem.media_type === 'image') {
+    // Store the button reference in the event for the download function
+    window.event = e;
+    downloadImage(currentModalItem);
+  }
+});
+
 // Close modal when clicking outside of it
 window.addEventListener('click', (event) => {
   if (event.target === modal) {
@@ -227,12 +237,20 @@ document.addEventListener('keydown', (event) => {
 
 // Function to show the modal with image/video details
 function showModal(item) {
-  // Store current item for sharing
+  // Store current item for sharing and downloading
   currentModalItem = item;
   
   // Show the modal immediately with loading state
   modal.style.display = 'block';
   document.body.style.overflow = 'hidden'; // Prevent background scrolling
+  
+  // Show/hide download button based on media type
+  if (item.media_type === 'image') {
+    modalDownloadButton.style.display = 'flex';
+    modalDownloadButton.disabled = false;
+  } else {
+    modalDownloadButton.style.display = 'none';
+  }
   
   // Show loading state first
   showLoadingState();
@@ -669,6 +687,24 @@ function createImageCard(item) {
     e.stopPropagation(); // Prevent card click event
     shareAPOD(item);
   });
+
+  // Create download button for the card (only for images)
+  let downloadButton = null;
+  if (item.media_type === 'image') {
+    downloadButton = document.createElement('button');
+    downloadButton.className = 'card-download-btn';
+    downloadButton.innerHTML = '💾';
+    downloadButton.title = 'Download high-resolution image';
+    downloadButton.setAttribute('aria-label', 'Download this image');
+    
+    // Add download functionality
+    downloadButton.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent card click event
+      // Store the button reference in the event for the download function
+      window.event = e;
+      downloadImage(item);
+    });
+  }
   
   // Create title element
   const title = document.createElement('h3');
@@ -698,6 +734,9 @@ function createImageCard(item) {
   // Add all elements to the card
   card.appendChild(mediaElement);
   card.appendChild(shareButton);
+  if (downloadButton) {
+    card.appendChild(downloadButton);
+  }
   card.appendChild(title);
   card.appendChild(date);
   card.appendChild(explanation);
@@ -746,3 +785,140 @@ function addTiltEffect(card, mediaElement) {
     mediaElement.style.transform = 'scale(1) rotateX(0deg) rotateY(0deg)';
   });
 }
+
+// Function to download high-resolution image
+async function downloadImage(item) {
+  let downloadBtn = null;
+  let originalText = '';
+  
+  try {
+    // Find the download button that was clicked
+    downloadBtn = event.target;
+    originalText = downloadBtn.innerHTML;
+    
+    // Show loading state on download button
+    downloadBtn.innerHTML = '⏳ Downloading...';
+    downloadBtn.disabled = true;
+    
+    // Use hdurl if available, otherwise use regular url
+    const imageUrl = item.hdurl || item.url;
+    
+    // Try to download using direct link approach first (works for same-origin or CORS-enabled images)
+    try {
+      const response = await fetch(imageUrl, {
+        mode: 'cors',
+        headers: {
+          'Accept': 'image/*'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      // Get the image as blob
+      const blob = await response.blob();
+      
+      // Create download filename
+      const date = item.date;
+      const title = item.title.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_').substring(0, 50);
+      const extension = imageUrl.toLowerCase().includes('.jpg') || imageUrl.toLowerCase().includes('.jpeg') ? '.jpg' : '.png';
+      const filename = `NASA_APOD_${date}_${title}${extension}`;
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      
+      // Cleanup
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }, 100);
+      
+      // Show success feedback
+      showDownloadFeedback('Image downloaded successfully! 📁');
+      
+    } catch (fetchError) {
+      // Fallback: Open image in new tab for manual save
+      console.log('Direct download failed, using fallback method:', fetchError);
+      
+      // Create download filename for display
+      const date = item.date;
+      const title = item.title.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_').substring(0, 50);
+      
+      // Open the high-resolution image in a new tab
+      const newWindow = window.open(imageUrl, '_blank');
+      if (newWindow) {
+        // Show instruction feedback
+        showDownloadFeedback(`Opening high-res image in new tab. Right-click and "Save As..." to download. 💾`, false);
+      } else {
+        // If popup blocked, copy URL to clipboard
+        try {
+          await navigator.clipboard.writeText(imageUrl);
+          showDownloadFeedback(`Popup blocked. High-res image URL copied to clipboard! Paste in new tab to download. 📋`, false);
+        } catch (clipboardError) {
+          showDownloadFeedback(`Download failed. Try right-clicking the image and selecting "Save As..." ❌`, true);
+        }
+      }
+    }
+    
+  } catch (error) {
+    console.error('Download failed:', error);
+    showDownloadFeedback('Download failed. Please try again. ❌', true);
+  } finally {
+    // Restore button state
+    if (downloadBtn && originalText) {
+      downloadBtn.innerHTML = originalText;
+      downloadBtn.disabled = false;
+    }
+  }
+}
+
+// Function to show download feedback to user
+function showDownloadFeedback(message, isError = false) {
+  // Remove existing download feedback
+  const existingFeedback = document.getElementById('downloadFeedback');
+  if (existingFeedback) {
+    existingFeedback.remove();
+  }
+  
+  // Create feedback element
+  const feedback = document.createElement('div');
+  feedback.id = 'downloadFeedback';
+  feedback.className = isError ? 'download-feedback download-error' : 'download-feedback';
+  feedback.textContent = message;
+  
+  // Position it appropriately
+  if (modal.style.display === 'block') {
+    // If modal is open, position relative to modal
+    modal.appendChild(feedback);
+    feedback.style.position = 'absolute';
+    feedback.style.top = '70px';
+    feedback.style.left = '50%';
+    feedback.style.transform = 'translateX(-50%)';
+    feedback.style.zIndex = '1002';
+  } else {
+    // If in gallery view, position at top of page
+    document.body.appendChild(feedback);
+    feedback.style.position = 'fixed';
+    feedback.style.top = '70px';
+    feedback.style.left = '50%';
+    feedback.style.transform = 'translateX(-50%)';
+    feedback.style.zIndex = '1000';
+  }
+  
+  // Auto-remove feedback after delay (longer for informational messages)
+  const delay = message.length > 50 ? 6000 : 3000;
+  setTimeout(() => {
+    if (feedback.parentNode) {
+      feedback.remove();
+    }
+  }, delay);
+}
+
+// Function to extract YouTube video ID from URL

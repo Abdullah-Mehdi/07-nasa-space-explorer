@@ -4,6 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>NASA Space Explorer</title>
+  <link rel="icon" type="image/jpeg" href="img/NASA-Logo-Large.jpg" />
+  <link rel="shortcut icon" type="image/jpeg" href="img/NASA-Logo-Large.jpg" />
+  <link rel="apple-touch-icon" href="img/NASA-Logo-Large.jpg" />
   <link href="style.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -50,9 +53,14 @@
       <div class="modal-info">
         <div class="modal-header">
           <h2 id="modalTitle"></h2>
-          <button id="modalShareButton" class="modal-share-btn" title="Share this space image">
-            🔗 Share
-          </button>
+          <div class="modal-actions">
+            <button id="modalDownloadButton" class="modal-download-btn" title="Download high-resolution image">
+              💾 Download
+            </button>
+            <button id="modalShareButton" class="modal-share-btn" title="Share this space image">
+              🔗 Share
+            </button>
+          </div>
         </div>
         <p id="modalDate" class="modal-date"></p>
         <p id="modalExplanation" class="modal-explanation"></p>

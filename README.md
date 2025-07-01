@@ -1,6 +1,11 @@
 # 🚀 NASA Space Explorer App
 
-> **An interactive web application that brings the cosmos to your fingertips!**
+> **An interactive web application th3. **View Details**: Click any image or video for full-screen modal view
+4. **Download Images**: Use the download button (💾) to save high-resolution versions
+5. **Share Content**: Click the share button (🔗) to share NASA's amazing discoveries
+6. **Toggle Theme**: Use the theme button (🌙/☀️) to switch between light and dark modes
+7. **Discover Facts**: Learn something new with the random space facts section
+8. **Get More Facts**: Click the rocket button for additional astronomy triviabrings the cosmos to your fingertips!**
 
 This project showcases NASA's daily "Astronomy Picture of the Day" (APOD) collection through a beautiful, modern web interface. Built with vanilla JavaScript, HTML, and CSS, it demonstrates advanced web development techniques including API integration, responsive design, 3D animations, and user experience optimization.
 
@@ -19,8 +24,11 @@ This project showcases NASA's daily "Astronomy Picture of the Day" (APOD) collec
 ### 🎨 **Advanced UI/UX**
 - **Interactive Cards**: Hover effects with mouse-following 3D tilt animations
 - **Modal Previews**: Full-screen image and video viewing with loading states
+- **Download Feature**: High-resolution image downloads with progress feedback
+- **Theme Toggle**: Light/dark mode following NASA's brand guidelines
 - **YouTube Integration**: Embedded video playback with thumbnail previews
 - **Space Facts**: Random astronomy facts that refresh on each visit
+- **Share Functionality**: Native sharing and clipboard fallback options
 - **Loading Animations**: Smooth transitions and rocket-themed loading states
 
 ### 🛡️ **Quality Features**
@@ -129,15 +137,15 @@ const NASA_API_URL = 'https://api.nasa.gov/planetary/apod';
 
 ## 🤝 Contributing
 
-Feel free to fork this project and make it your own! Ideas for enhancements I have:
+Feel free to fork this project and make it your own! Ideas for enhancements:
 
 - **Add favorites system** for bookmarking favorite images
 - **Implement search functionality** by keywords or topics
-- **Create image download feature** for saving high-res versions
-- **Add sharing capabilities** for social media
 - **Include more NASA APIs** (Mars rover photos, ISS location, etc.)
-- **Add dark/light theme toggle**
+- **Add image filters and effects** for enhanced viewing
 - **Implement infinite scroll** for continuous browsing
+- **Create offline caching** for previously viewed images
+- **Add image comparison tools** for side-by-side viewing
 
 ## 📄 License
 
