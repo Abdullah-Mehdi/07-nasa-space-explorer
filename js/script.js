@@ -4,6 +4,39 @@ const endInput = document.getElementById('endDate');
 const fetchButton = document.getElementById('fetchButton');
 const gallery = document.getElementById('gallery');
 
+// Space facts elements
+const spaceFactElement = document.getElementById('spaceFact');
+const newFactButton = document.getElementById('newFactButton');
+
+// Array of fun space facts
+const spaceFacts = [
+  "One day on Venus is longer than one year on Venus! It takes 243 Earth days to rotate once but only 225 Earth days to orbit the Sun.",
+  "There are more possible games of chess than there are atoms in the observable universe.",
+  "A neutron star is so dense that a teaspoon of its material would weigh about 6 billion tons on Earth.",
+  "The footprints left by Apollo astronauts on the Moon will last for millions of years because there's no wind to blow them away.",
+  "Jupiter's Great Red Spot is a storm that has been raging for at least 400 years and is larger than Earth.",
+  "If you could drive a car to the Sun at 60 mph, it would take you over 100 years to get there.",
+  "Saturn's moon Titan has lakes and rivers made of liquid methane and ethane instead of water.",
+  "The Milky Way galaxy is on a collision course with the Andromeda galaxy, but don't worry - it won't happen for 4.5 billion years!",
+  "A single bolt of lightning contains enough energy to toast 100,000 slices of bread.",
+  "The International Space Station travels at 17,500 mph and orbits Earth every 90 minutes.",
+  "Mars has the largest volcano in the solar system - Olympus Mons is about 13.6 miles high, nearly three times taller than Mount Everest.",
+  "There are more stars in the universe than grains of sand on all the beaches on Earth.",
+  "The Sun is so massive that it accounts for 99.86% of the total mass of our solar system.",
+  "Mercury has no atmosphere, so temperatures can range from 800°F during the day to -300°F at night.",
+  "A year on Pluto lasts 248 Earth years, so if you were born on Pluto, you'd have to wait almost 250 years for your first birthday!",
+  "The universe is expanding so fast that galaxies are moving away from us faster than the speed of light.",
+  "Black holes don't actually suck things in - they warp space-time so severely that nothing can escape once it crosses the event horizon.",
+  "The coldest place in the universe isn't in space - it's in laboratories on Earth where scientists have reached temperatures near absolute zero.",
+  "Betelgeuse, one of the brightest stars in the night sky, could explode as a supernova at any time in the next 100,000 years.",
+  "The Hubble Space Telescope has traveled more than 4 billion miles in its orbit around Earth - that's like traveling to Neptune and back!",
+  "Europa, one of Jupiter's moons, has twice as much water as all of Earth's oceans combined, hidden beneath its icy surface.",
+  "A day on Mercury lasts 59 Earth days, but a year on Mercury is only 88 Earth days long.",
+  "The Voyager 1 spacecraft, launched in 1977, is now over 14 billion miles from Earth and still sending data back to NASA.",
+  "If Earth were the size of a marble, the Sun would be the size of a basketball located about 26 yards away.",
+  "Astronauts can grow up to 2 inches taller in space because the lack of gravity allows their spine to stretch out."
+];
+
 // Modal elements
 const modal = document.getElementById('imageModal');
 const modalImage = document.getElementById('modalImage');
@@ -19,8 +52,120 @@ const closeModal = document.querySelector('.close');
 // - Restrict dates to NASA's image archive (starting from 1995)
 setupDateInputs(startInput, endInput);
 
+// Initialize space facts when page loads
+displayRandomSpaceFact();
+
+// Run initial validation to ensure proper button state
+setTimeout(() => {
+  validateDateSelection();
+}, 100);
+
 // Add event listener to the fetch button
 fetchButton.addEventListener('click', fetchNASAImages);
+
+// Add event listener to the new fact button
+newFactButton.addEventListener('click', displayRandomSpaceFact);
+
+// Add validation listeners to date inputs
+startInput.addEventListener('change', validateDateSelection);
+endInput.addEventListener('change', validateDateSelection);
+
+// Function to validate date selection and provide user feedback
+function validateDateSelection() {
+  const startDate = new Date(startInput.value);
+  const endDate = new Date(endInput.value);
+  const today = new Date();
+  const earliestDate = new Date('1995-06-16');
+  
+  let isValid = true;
+  let errorMessage = '';
+  
+  // Check if start date is in the future
+  if (startDate > today) {
+    isValid = false;
+    errorMessage = 'Start date cannot be in the future. Please select a date up to today.';
+    startInput.style.borderColor = '#ff4444';
+  } else {
+    startInput.style.borderColor = '#ddd';
+  }
+  
+  // Check if end date is in the future
+  if (endDate > today) {
+    isValid = false;
+    errorMessage = 'End date cannot be in the future. Please select a date up to today.';
+    endInput.style.borderColor = '#ff4444';
+  } else {
+    endInput.style.borderColor = '#ddd';
+  }
+  
+  // Check if dates are before NASA's first image
+  if (startDate < earliestDate) {
+    isValid = false;
+    errorMessage = 'Start date cannot be before June 16, 1995 (NASA\'s first APOD image).';
+    startInput.style.borderColor = '#ff4444';
+  }
+  
+  if (endDate < earliestDate) {
+    isValid = false;
+    errorMessage = 'End date cannot be before June 16, 1995 (NASA\'s first APOD image).';
+    endInput.style.borderColor = '#ff4444';
+  }
+  
+  // Check if start date is after end date
+  if (startDate > endDate) {
+    isValid = false;
+    errorMessage = 'Start date cannot be after end date.';
+    startInput.style.borderColor = '#ff4444';
+    endInput.style.borderColor = '#ff4444';
+  }
+  
+  // Show or hide error message
+  showValidationMessage(errorMessage, !isValid);
+  
+  // Enable/disable fetch button based on validation
+  fetchButton.disabled = !isValid;
+  fetchButton.style.opacity = isValid ? '1' : '0.5';
+  fetchButton.style.cursor = isValid ? 'pointer' : 'not-allowed';
+}
+
+// Function to show validation messages to the user
+function showValidationMessage(message, isError) {
+  // Remove existing validation message
+  const existingMessage = document.getElementById('validationMessage');
+  if (existingMessage) {
+    existingMessage.remove();
+  }
+  
+  // Add new validation message if there's a message
+  if (message) {
+    const messageDiv = document.createElement('div');
+    messageDiv.id = 'validationMessage';
+    messageDiv.className = `validation-message ${isError ? 'error' : 'success'}`;
+    messageDiv.textContent = message;
+    
+    // Insert after the filters div
+    const filtersDiv = document.querySelector('.filters');
+    filtersDiv.parentNode.insertBefore(messageDiv, filtersDiv.nextSibling);
+  }
+}
+
+// Function to display a random space fact
+function displayRandomSpaceFact() {
+  // Show loading state briefly for smooth transition
+  spaceFactElement.style.opacity = '0.5';
+  spaceFactElement.textContent = 'Loading an amazing space fact...';
+  
+  // After a brief delay, show the new fact
+  setTimeout(() => {
+    // Get a random fact from the array
+    const randomIndex = Math.floor(Math.random() * spaceFacts.length);
+    const randomFact = spaceFacts[randomIndex];
+    
+    // Display the fact with a smooth transition
+    spaceFactElement.textContent = randomFact;
+    spaceFactElement.style.opacity = '1';
+  }, 300);
+}
 
 // Modal event listeners
 closeModal.addEventListener('click', hideModal);
@@ -197,15 +342,48 @@ async function fetchNASAImages() {
   
   // Check if both dates are selected
   if (!startDate || !endDate) {
-    alert('Please select both start and end dates');
+    showValidationMessage('Please select both start and end dates', true);
     return;
   }
   
-  // Show loading message
+  // Validate dates one more time before fetching
+  const startDateObj = new Date(startDate);
+  const endDateObj = new Date(endDate);
+  const today = new Date();
+  
+  if (startDateObj > today || endDateObj > today) {
+    showValidationMessage('Cannot fetch images for future dates. Please select dates up to today.', true);
+    return;
+  }
+  
+  // Calculate number of days in range
+  const daysDifference = Math.ceil((endDateObj - startDateObj) / (1000 * 60 * 60 * 24)) + 1;
+  
+  // Show confirmation for large date ranges
+  if (daysDifference > 30) {
+    const confirm = window.confirm(
+      `You've selected ${daysDifference} days of images. This might take a while to load. Do you want to continue?`
+    );
+    if (!confirm) {
+      return;
+    }
+  }
+  
+  // Clear any existing validation messages
+  showValidationMessage('', false);
+  
+  // Show success message for valid selection
+  showValidationMessage(
+    `Loading ${daysDifference} day${daysDifference > 1 ? 's' : ''} of space images from ${startDate} to ${endDate}...`, 
+    false
+  );
+  
+  // Show loading message in gallery
   gallery.innerHTML = `
     <div class="placeholder">
       <div class="placeholder-icon">🚀</div>
       <p>Loading amazing space images...</p>
+      <p style="font-size: 14px; color: #888;">Fetching ${daysDifference} day${daysDifference > 1 ? 's' : ''} of content...</p>
     </div>
   `;
   
@@ -224,12 +402,18 @@ async function fetchNASAImages() {
     // Parse the JSON response
     const data = await response.json();
     
+    // Clear validation message after successful fetch
+    setTimeout(() => {
+      showValidationMessage('', false);
+    }, 2000);
+    
     // Display the images in the gallery
     displayImages(data);
     
   } catch (error) {
     // Show error message if something goes wrong
     console.error('Error fetching NASA images:', error);
+    showValidationMessage('Sorry, there was an error loading the images. Please try again.', true);
     gallery.innerHTML = `
       <div class="placeholder">
         <div class="placeholder-icon">❌</div>
@@ -291,9 +475,29 @@ function createImageCard(item) {
     // Create a clickable div for videos (since they're usually YouTube embeds)
     mediaElement = document.createElement('div');
     mediaElement.className = 'video-thumbnail';
+    
+    // Extract YouTube video ID to get thumbnail
+    const videoId = extractYouTubeID(item.url);
+    let thumbnailUrl = '';
+    
+    if (videoId) {
+      // Use YouTube thumbnail as background
+      thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+    }
+    
+    // Set background image if we have a thumbnail
+    if (thumbnailUrl) {
+      mediaElement.style.backgroundImage = `url(${thumbnailUrl})`;
+      mediaElement.style.backgroundSize = 'cover';
+      mediaElement.style.backgroundPosition = 'center';
+      mediaElement.style.position = 'relative';
+    }
+    
     mediaElement.innerHTML = `
-      <div class="video-play-icon">▶️</div>
-      <p>Click to watch video</p>
+      <div class="video-overlay">
+        <div class="video-play-icon">▶️</div>
+        <p>Click to watch video</p>
+      </div>
     `;
     
     // Make video thumbnail clickable to open modal
