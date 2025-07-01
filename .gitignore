@@ -1,5 +1,5 @@
-# API Configuration
-js/config.js
+# API Configuration - No longer needed since config.js contains only functions
+# js/config.js
 
 # Dependencies
 node_modules/
