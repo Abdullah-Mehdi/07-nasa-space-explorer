@@ -1,3 +1,33 @@
+// Theme toggle functionality
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = themeToggle.querySelector('.theme-icon');
+
+// Check for saved theme or default to light mode
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+updateThemeIcon(savedTheme);
+
+// Theme toggle event listener
+themeToggle.addEventListener('click', () => {
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+  updateThemeIcon(newTheme);
+});
+
+// Function to update theme icon
+function updateThemeIcon(theme) {
+  if (theme === 'dark') {
+    themeIcon.textContent = '☀️';
+    themeToggle.setAttribute('aria-label', 'Switch to light mode');
+  } else {
+    themeIcon.textContent = '🌙';
+    themeToggle.setAttribute('aria-label', 'Switch to dark mode');
+  }
+}
+
 // Find our date picker inputs on the page
 const startInput = document.getElementById('startDate');
 const endInput = document.getElementById('endDate');
