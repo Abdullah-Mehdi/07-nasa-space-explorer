@@ -109,12 +109,13 @@ button:hover {
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  perspective: 1000px; /* Enable 3D transforms */
 }
 
 .gallery-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
 /* Three columns on wider screens */
@@ -129,6 +130,8 @@ button:hover {
   height: 200px;
   object-fit: cover;
   border-radius: 4px;
+  transition: transform 0.1s ease;
+  transform-style: preserve-3d;
 }
 
 /* Video thumbnail styles */
@@ -143,16 +146,18 @@ button:hover {
   justify-content: center;
   color: white;
   text-align: center;
-  transition: transform 0.2s ease;
-}
-
-.video-thumbnail:hover {
-  transform: scale(1.02);
+  transition: transform 0.1s ease;
+  transform-style: preserve-3d;
 }
 
 .video-play-icon {
   font-size: 48px;
   margin-bottom: 10px;
+  transition: transform 0.1s ease;
+}
+
+.gallery-item:hover .video-play-icon {
+  transform: scale(1.1);
 }
 
 .video-thumbnail p {
@@ -166,12 +171,6 @@ button:hover {
   color: #333;
   margin: 10px 0 5px 0;
   line-height: 1.3;
-}
-
-/* Image hover effect */
-.gallery-item img:hover {
-  transform: scale(1.02);
-  transition: transform 0.2s ease;
 }
 
 .gallery-item p {

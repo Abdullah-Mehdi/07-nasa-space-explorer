@@ -284,6 +284,9 @@ function createImageCard(item) {
     });
     mediaElement.style.cursor = 'pointer';
     
+    // Add mouse tilt effect for images
+    addTiltEffect(card, mediaElement);
+    
   } else if (item.media_type === 'video') {
     // Create a clickable div for videos (since they're usually YouTube embeds)
     mediaElement = document.createElement('div');
@@ -299,6 +302,9 @@ function createImageCard(item) {
       showModal(item);
     });
     mediaElement.style.cursor = 'pointer';
+    
+    // Add mouse tilt effect for videos
+    addTiltEffect(card, mediaElement);
   }
   
   // Create title element
@@ -339,4 +345,40 @@ function createImageCard(item) {
   });
   
   return card;
+}
+
+// Function to add mouse tilt effect to gallery items
+function addTiltEffect(card, mediaElement) {
+  // Mouse move handler for tilt effect
+  card.addEventListener('mousemove', (e) => {
+    // Get the card's position and dimensions
+    const rect = card.getBoundingClientRect();
+    
+    // Calculate mouse position relative to the card center
+    const cardCenterX = rect.left + rect.width / 2;
+    const cardCenterY = rect.top + rect.height / 2;
+    
+    // Calculate the distance from center (normalized to -1 to 1)
+    const mouseX = (e.clientX - cardCenterX) / (rect.width / 2);
+    const mouseY = (e.clientY - cardCenterY) / (rect.height / 2);
+    
+    // Calculate tilt angles (max 15 degrees)
+    const tiltX = mouseY * -10; // Negative for natural tilt direction
+    const tiltY = mouseX * 10;
+    
+    // Apply the transform with scale and tilt
+    const scale = 1.05;
+    mediaElement.style.transform = `scale(${scale}) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+  });
+  
+  // Mouse enter handler - start the effect
+  card.addEventListener('mouseenter', () => {
+    mediaElement.style.transition = 'transform 0.1s ease';
+  });
+  
+  // Mouse leave handler - reset to normal
+  card.addEventListener('mouseleave', () => {
+    mediaElement.style.transition = 'transform 0.3s ease';
+    mediaElement.style.transform = 'scale(1) rotateX(0deg) rotateY(0deg)';
+  });
 }
