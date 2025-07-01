@@ -116,13 +116,6 @@ This project demonstrates:
 - **Performance**: Optimized animations and loading
 - **Security**: Proper API key management
 
-Perfect for students learning:
-- Frontend web development
-- JavaScript DOM manipulation
-- CSS animations and transforms
-- API consumption patterns
-- User interface design principles
-
 ## 🔧 Configuration
 
 The project uses NASA's APOD API. To set up:
@@ -136,7 +129,7 @@ const NASA_API_URL = 'https://api.nasa.gov/planetary/apod';
 
 ## 🤝 Contributing
 
-Feel free to fork this project and make it your own! Ideas for enhancements:
+Feel free to fork this project and make it your own! Ideas for enhancements I have:
 
 - **Add favorites system** for bookmarking favorite images
 - **Implement search functionality** by keywords or topics

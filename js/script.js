@@ -45,6 +45,10 @@ const modalTitle = document.getElementById('modalTitle');
 const modalDate = document.getElementById('modalDate');
 const modalExplanation = document.getElementById('modalExplanation');
 const closeModal = document.querySelector('.close');
+const modalShareButton = document.getElementById('modalShareButton');
+
+// Variable to store current modal item for sharing
+let currentModalItem = null;
 
 // Call the setupDateInputs function from dateRange.js
 // This sets up the date pickers to:
@@ -170,6 +174,13 @@ function displayRandomSpaceFact() {
 // Modal event listeners
 closeModal.addEventListener('click', hideModal);
 
+// Modal share button event listener
+modalShareButton.addEventListener('click', () => {
+  if (currentModalItem) {
+    shareAPOD(currentModalItem);
+  }
+});
+
 // Close modal when clicking outside of it
 window.addEventListener('click', (event) => {
   if (event.target === modal) {
@@ -186,6 +197,9 @@ document.addEventListener('keydown', (event) => {
 
 // Function to show the modal with image/video details
 function showModal(item) {
+  // Store current item for sharing
+  currentModalItem = item;
+  
   // Show the modal immediately with loading state
   modal.style.display = 'block';
   document.body.style.overflow = 'hidden'; // Prevent background scrolling
@@ -325,6 +339,108 @@ function loadVideoContent(item) {
 function hideModal() {
   modal.style.display = 'none';
   document.body.style.overflow = 'auto'; // Restore background scrolling
+  currentModalItem = null; // Clear current item
+}
+
+// Function to share an APOD item
+function shareAPOD(item) {
+  // Create a shareable URL
+  const shareUrl = `https://apod.nasa.gov/apod/ap${item.date.replace(/-/g, '').substring(2)}.html`;
+  
+  // Create share data
+  const shareData = {
+    title: `NASA APOD: ${item.title}`,
+    text: `Check out this amazing space ${item.media_type === 'video' ? 'video' : 'image'} from NASA! "${item.title}" - ${item.date}`,
+    url: shareUrl
+  };
+  
+  // Try to use native Web Share API if available
+  if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+    navigator.share(shareData)
+      .then(() => {
+        showShareFeedback('Shared successfully! 🚀');
+      })
+      .catch((error) => {
+        console.log('Share cancelled or failed:', error);
+        // Fallback to copy link
+        copyToClipboard(shareUrl, item);
+      });
+  } else {
+    // Fallback: Copy link to clipboard
+    copyToClipboard(shareUrl, item);
+  }
+}
+
+// Function to copy link to clipboard as fallback
+function copyToClipboard(url, item) {
+  // Try to use modern clipboard API
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url)
+      .then(() => {
+        showShareFeedback('Link copied to clipboard! 📋');
+      })
+      .catch(() => {
+        // Final fallback: show the URL
+        showShareFeedback(`Share this link: ${url}`, true);
+      });
+  } else {
+    // Legacy fallback: create a temporary input to copy
+    const tempInput = document.createElement('input');
+    tempInput.value = url;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    
+    try {
+      document.execCommand('copy');
+      showShareFeedback('Link copied to clipboard! 📋');
+    } catch (err) {
+      showShareFeedback(`Share this link: ${url}`, true);
+    }
+    
+    document.body.removeChild(tempInput);
+  }
+}
+
+// Function to show share feedback to user
+function showShareFeedback(message, isLongMessage = false) {
+  // Remove existing share feedback
+  const existingFeedback = document.getElementById('shareFeedback');
+  if (existingFeedback) {
+    existingFeedback.remove();
+  }
+  
+  // Create feedback element
+  const feedback = document.createElement('div');
+  feedback.id = 'shareFeedback';
+  feedback.className = 'share-feedback';
+  feedback.textContent = message;
+  
+  // Position it appropriately
+  if (modal.style.display === 'block') {
+    // If modal is open, position relative to modal
+    modal.appendChild(feedback);
+    feedback.style.position = 'absolute';
+    feedback.style.top = '20px';
+    feedback.style.left = '50%';
+    feedback.style.transform = 'translateX(-50%)';
+    feedback.style.zIndex = '1002';
+  } else {
+    // If in gallery view, position at top of page
+    document.body.appendChild(feedback);
+    feedback.style.position = 'fixed';
+    feedback.style.top = '20px';
+    feedback.style.left = '50%';
+    feedback.style.transform = 'translateX(-50%)';
+    feedback.style.zIndex = '1000';
+  }
+  
+  // Auto-remove feedback after delay
+  const delay = isLongMessage ? 8000 : 3000;
+  setTimeout(() => {
+    if (feedback.parentNode) {
+      feedback.remove();
+    }
+  }, delay);
 }
 
 // Function to extract YouTube video ID from URL
@@ -511,6 +627,19 @@ function createImageCard(item) {
     addTiltEffect(card, mediaElement);
   }
   
+  // Create share button for the card
+  const shareButton = document.createElement('button');
+  shareButton.className = 'card-share-btn';
+  shareButton.innerHTML = '🔗';
+  shareButton.title = 'Share this space image';
+  shareButton.setAttribute('aria-label', 'Share this image');
+  
+  // Add share functionality
+  shareButton.addEventListener('click', (e) => {
+    e.stopPropagation(); // Prevent card click event
+    shareAPOD(item);
+  });
+  
   // Create title element
   const title = document.createElement('h3');
   title.textContent = item.title;
@@ -538,6 +667,7 @@ function createImageCard(item) {
   
   // Add all elements to the card
   card.appendChild(mediaElement);
+  card.appendChild(shareButton);
   card.appendChild(title);
   card.appendChild(date);
   card.appendChild(explanation);
